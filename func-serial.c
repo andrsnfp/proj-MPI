@@ -102,7 +102,7 @@ void writeFile(Documento doc[], int nDocs){
 //Fucao que recebe os dados e os atribui ao respectivo destino
 void process(){
     int i,j;
-    bool change = true;
+    bool change = false;
     double *arr = readfile();
     int nArmarios = (int)arr[0];
     int nDocs = (int)arr[1];
@@ -114,8 +114,10 @@ void process(){
     initializeDocs(docs,nDocs,nAssuntos,arr);
     initialAssignment(armarios,docs,nArmarios,nDocs);
 
-    avgCalculator(armarios,nArmarios,nAssuntos,change);
-    reallocateDocs(armarios,docs,nArmarios,nDocs,nAssuntos,change);
+    while(change){
+        avgCalculator(armarios,docs,nArmarios,nDocs,nAssuntos,change);
+    }
+    //reallocateDocs(armarios,docs,nArmarios,nDocs,nAssuntos,change);
     writeFile(docs,nDocs);
     free(arr);
     printf("\nPrograma Executado com Sucesso. Verificar Ficheiros.");
@@ -154,25 +156,7 @@ int getDocIndex(Armario armario, int numDocs) {
     return -1; // no empty slots found
 }
 
-//imprimir armarios e respectivos documentos
-void printState(Armario armarios[], Documento docs[], int nDocs, int nAssuntos,int nArmarios){
-    int i,j,k;
-    for (i = 0; i < nDocs; i++){
-        printf("\n%d: %d | ",docs[i].ID,docs[i].armarioActual);
-        
-        for (j = 0; j < nAssuntos; j++){
-            printf("%.1lf ",docs[i].assunto[j]);
-        }       
-    }
-    for (i = 0; i < nArmarios; i++){
-        printf("\nAvgs %d: ",armarios[i].ID);
-        for ( j = 0; j < nAssuntos; j++){
-            printf("%.3lf ",armarios[i].avgAssuntos[j]);
-        }
-    }
-}
-
-void avgCalculator(Armario armario[], int nArmarios, int nAssuntos, bool change) {
+void avgCalculator(Armario armario[], Documento docs[],int nArmarios, int nDocs,int nAssuntos, bool change) {
     int i, j, k;
     for (i = 0; i < nArmarios; i++) {
         for (k = 0; k < nAssuntos; k++) {
@@ -183,13 +167,13 @@ void avgCalculator(Armario armario[], int nArmarios, int nAssuntos, bool change)
             armario[i].avgAssuntos[k] = num / armario[i].numDocs;
         }
     }
+    reallocateDocs(armario,docs,nArmarios,nDocs,nAssuntos,change);
 }
 
 void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDocs, int nAssuntos, bool change) {
     int i,j,k;
     
     while(1){
-        change = false;
         for (i = 0; i < nDocs; i++){
             
             int antigo = docs[i].armarioActual;
@@ -203,8 +187,8 @@ void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDo
                 docs[i].posicaoArmario = armarios[newArmario].numDocs;
                 armarios[newArmario].docs[armarios[newArmario].numDocs] = docs[i];
                 armarios[newArmario].numDocs++;
-                change = true;
-                
+                change=true;
+
                 for (j = posAntiga; j < (armarios[antigo].numDocs - 1); j++) {
                     armarios[antigo].docs[j] = armarios[antigo].docs[j+1];
                     armarios[antigo].docs[j].posicaoArmario = j;
@@ -215,7 +199,7 @@ void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDo
         }
 
         if(change){
-            
+            avgCalculator(armarios,docs,nArmarios,nDocs,nAssuntos,change);
         }else{
             break;
         }
