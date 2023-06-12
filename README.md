@@ -1,10 +1,10 @@
 # Projecto com MPI
    Este projecto representa a versão paralela com MPI
 # Como rodar o projeto em ambiente local
-   Este documento descreve os passos necessários para rodar o projeto em ambiente local:
-   Passo 1: Instale o OpenMPI
-   Abra um terminal.
-   Execute o seguinte comando para instalar o OpenMPI:
+   Este documento descreve os passos necessários para rodar o projeto em ambiente local:<br>
+   Passo 1: Instale o OpenMPI<br>
+   Abra um terminal.<br>
+   Execute o seguinte comando para instalar o OpenMPI:<br>
     ```sh 
      sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
     ```
