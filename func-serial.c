@@ -90,13 +90,7 @@ void writeFile(Documento doc[], int nDocs){
     for (i = 0; i < nDocs; i++){
         fprintf(file, "%d %d\n", doc[i].ID, doc[i].armarioActual);
     }
-    fclose(file);
-
-    /*FILE *filetxt = fopen("docs.out.txt","w");
-    for (i = 0; i < nDocs; i++){
-        fprintf(filetxt, "%d %d\n", doc[i].ID, doc[i].armarioActual);
-    }
-    fclose(filetxt);*/    
+    fclose(file);   
 }
 
 //Fucao que recebe os dados e os atribui ao respectivo destino
@@ -114,9 +108,7 @@ void process(){
     initializeDocs(docs,nDocs,nAssuntos,arr);
     initialAssignment(armarios,docs,nArmarios,nDocs);
 
-    while(change){
-        avgCalculator(armarios,docs,nArmarios,nDocs,nAssuntos,change);
-    }
+    avgCalculator(armarios,docs,nArmarios,nDocs,nAssuntos,change);
     //reallocateDocs(armarios,docs,nArmarios,nDocs,nAssuntos,change);
     writeFile(docs,nDocs);
     free(arr);
@@ -174,26 +166,23 @@ void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDo
     int i,j,k;
     
     while(1){
+        change = false;
         for (i = 0; i < nDocs; i++){
             
             int antigo = docs[i].armarioActual;
             int posAntiga = docs[i].posicaoArmario;
             int newArmario = calcularArmarioMaisProx(armarios,docs[i],nArmarios,nAssuntos);
+            printf("%d",newArmario);
 
             if (antigo != newArmario){
-
-                armarios[newArmario].docs = realloc(armarios[newArmario].docs, (armarios[newArmario].numDocs + 1) * sizeof(Documento));
                 docs[i].armarioActual = newArmario;
-                docs[i].posicaoArmario = armarios[newArmario].numDocs;
-                armarios[newArmario].docs[armarios[newArmario].numDocs] = docs[i];
-                armarios[newArmario].numDocs++;
-                change=true;
+                armarios[newArmario].docs[getDocIndex(armarios[newArmario],nDocs)] = docs[i];
+                change = true;
 
-                for (j = posAntiga; j < (armarios[antigo].numDocs - 1); j++) {
-                    armarios[antigo].docs[j] = armarios[antigo].docs[j+1];
-                    armarios[antigo].docs[j].posicaoArmario = j;
+                for (j = posAntiga + 1; j < armarios[antigo].numDocs; j++) {
+                    armarios[antigo].docs[j - 1] = armarios[antigo].docs[j];
+                    armarios[antigo].docs[j - 1].posicaoArmario = j - 1;
                 }
-                armarios[antigo].docs = realloc(armarios[antigo].docs, (armarios[antigo].numDocs - 1) * sizeof(Documento));
                 armarios[antigo].numDocs--;
             }
         }
