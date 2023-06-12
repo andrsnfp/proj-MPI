@@ -84,7 +84,7 @@ double *readfile(){
 }
 
 //Funcao que apresenta a saida np ficheiro de saida
-void writeFile(Documento doc[], int nDocs){
+void writeFile(Documento *doc, int nDocs){
     int i;
     FILE *file = fopen("docs.out", "w");
     for (i = 0; i < nDocs; i++){
@@ -116,7 +116,7 @@ void process(){
 }
 
 //funcao que atribui os documentos aos armarios usando round-robin
-void initialAssignment(Armario armario[], Documento docs[], int nArmarios, int nDocs){
+void initialAssignment(Armario *armario, Documento *docs, int nArmarios, int nDocs){
     // for each document, assign it to a cabinet using round-robin
     int i,j,k;
     for (i = 0; i < nDocs; i++) {
@@ -148,7 +148,7 @@ int getDocIndex(Armario armario, int numDocs) {
     return -1; // no empty slots found
 }
 
-void avgCalculator(Armario armario[], Documento docs[],int nArmarios, int nDocs,int nAssuntos, bool change) {
+void avgCalculator(Armario *armario, Documento *docs,int nArmarios, int nDocs,int nAssuntos, bool change) {
     int i, j, k;
     for (i = 0; i < nArmarios; i++) {
         for (k = 0; k < nAssuntos; k++) {
@@ -162,7 +162,7 @@ void avgCalculator(Armario armario[], Documento docs[],int nArmarios, int nDocs,
     reallocateDocs(armario,docs,nArmarios,nDocs,nAssuntos,change);
 }
 
-void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDocs, int nAssuntos, bool change) {
+void reallocateDocs(Armario *armarios, Documento *docs, int nArmarios, int nDocs, int nAssuntos, bool change) {
     int i,j,k;
     
     while(1){
@@ -172,13 +172,20 @@ void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDo
             int antigo = docs[i].armarioActual;
             int posAntiga = docs[i].posicaoArmario;
             int newArmario = calcularArmarioMaisProx(armarios,docs[i],nArmarios,nAssuntos);
+            
             printf("%d",newArmario);
 
             if (antigo != newArmario){
+                //update the documents current cabinet and position
                 docs[i].armarioActual = newArmario;
-                armarios[newArmario].docs[getDocIndex(armarios[newArmario],nDocs)] = docs[i];
-                change = true;
+                docs[i].posicaoArmario = getDocIndex(armarios[newArmario], nDocs);
 
+                //move the document to the new cabinet
+                armarios[newArmario].docs[docs[i].posicaoArmario] = docs[i];
+                armarios[newArmario].docs[docs[i].posicaoArmario].assigned = true;
+                armarios[newArmario].numDocs++;
+
+                change = true;
                 for (j = posAntiga + 1; j < armarios[antigo].numDocs; j++) {
                     armarios[antigo].docs[j - 1] = armarios[antigo].docs[j];
                     armarios[antigo].docs[j - 1].posicaoArmario = j - 1;
@@ -195,7 +202,7 @@ void reallocateDocs(Armario armarios[], Documento docs[], int nArmarios, int nDo
     }
 }
 
-void initializeArmarios(Armario armarios[], int numArmarios, int numDocs, int numAssuntos){
+void initializeArmarios(Armario *armarios, int numArmarios, int numDocs, int numAssuntos){
     int i,j;
     for (i = 0; i < numArmarios; i++) {
         armarios[i].ID = i;
@@ -205,7 +212,7 @@ void initializeArmarios(Armario armarios[], int numArmarios, int numDocs, int nu
     }
 }
 
-void initializeDocs(Documento docs[], int numDocs, int numAssuntos, double *input){
+void initializeDocs(Documento *docs, int numDocs, int numAssuntos, double *input){
     int i,j,count=3;
     for (i = 0; i < numDocs; i++){
         docs[i].ID = (int)input[count++];
@@ -217,7 +224,7 @@ void initializeDocs(Documento docs[], int numDocs, int numAssuntos, double *inpu
     }
 }
 
-int calcularArmarioMaisProx(Armario armarios[], Documento doc, int nArmarios, int nAssuntos){
+int calcularArmarioMaisProx(Armario *armarios, Documento doc, int nArmarios, int nAssuntos){
     int j,k;
 
     double menorDistancia = INFINITY;
