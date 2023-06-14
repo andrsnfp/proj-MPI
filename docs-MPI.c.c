@@ -4,7 +4,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <mpi.h>
-#include "doc-serial.h"
 
 /Estrutura de um Documento/
 typedef struct documento{
